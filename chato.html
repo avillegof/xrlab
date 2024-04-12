@@ -6,7 +6,7 @@
   <title>Chatbot</title>
   <style>
     /* Estilos básicos para la apariencia del chat */
-    body {
+ body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
@@ -22,24 +22,36 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       padding: 20px;
+      margin: 0 auto; /* Centrar el chatbot */
     }
     #chat-messages {
       overflow-y: auto;
       max-height: 300px;
     }
     #user-input {
-      width: 100%;
+      width: calc(100% - 20px); /* Ajustar el ancho para compensar el padding */
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
+    #image-container {
+      text-align: center; /* Centrar la imagen horizontalmente */
+      margin-bottom: 20px; /* Espacio entre la imagen y el chatbot */
+    }
   </style>
 </head>
 <body>
+
+<table>
+<tr>
+  <td><div id="image-container">
+	<img src="logo_nokia_teleporting_new.jpg" alt="Descripción de la imagen" style="max-width: 40%;">
+  </div></td>
+</tr><tr><td>
   <div id="chat-container">
     <div id="chat-messages"></div>
     <input type="text" id="user-input" placeholder="Escribe aquí...">
-  </div>
+  </div></td></tr></table>
 
   <script>
     // Arrays de frases prealmacenadas

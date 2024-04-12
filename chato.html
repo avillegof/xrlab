@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <style>
+    /* Estilos básicos para la apariencia del chat */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+    #chat-container {
+      width: 400px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    #chat-messages {
+      overflow-y: auto;
+      max-height: 300px;
+    }
+    #user-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-messages"></div>
+    <input type="text" id="user-input" placeholder="Escribe aquí...">
+  </div>
+
+  <script>
+    // Arrays de frases prealmacenadas
+    const respuestasPreguntas = [
+      "¡Esa es una pregunta interesante!",
+      "¡Wow, no lo sabía!",
+      "Déjame pensar...",
+      "¿Te gustaría saber más al respecto?",
+      "Eso es algo para reflexionar.",
+      "Es posible, pero no puedo confirmarlo.",
+      "¿Qué piensas tú?",
+      "¿Puedes elaborar un poco más?",
+      "Me parece una pregunta complicada.",
+      "Es una cuestión interesante.",
+      "Espera un momento, estoy procesando tu pregunta.",
+      "Tendría que investigar eso un poco más.",
+      "Es un tema que me intriga.",
+      "Nunca me lo habían preguntado antes.",
+      "Parece un dilema difícil.",
+      "No tengo una respuesta definitiva para eso.",
+      "Podría ser sí o no, dependiendo del contexto.",
+      "Es posible, pero no estoy seguro.",
+      "Deberías considerar todas las opciones.",
+      "Mi programación no me permite tomar partido.",
+    ];
+
+    const comentariosGenericos = [
+      "¡Hola!",
+      "¿Cómo estás?",
+      "¡Qué día tan bonito!",
+      "No entiendo la pregunta.",
+      "Pregunta de nuevo, por favor.",
+      "Lo siento, no tengo respuesta para eso.",
+      "Me alegra verte por aquí.",
+      "Es un placer ayudarte.",
+      "¿Hay algo más en lo que pueda ayudarte?",
+      "¿Cómo ha ido tu día?",
+      "¡Estoy aquí para ayudarte!",
+      "¿Hay algo específico de lo que te gustaría hablar?",
+      "Siempre es un buen momento para charlar contigo.",
+      "¿Qué tal si hablamos de algo interesante?",
+      "¿Sabías que soy un chatbot?",
+      "¿Te puedo ayudar con algo más?",
+      "¡Estoy aquí para responder tus preguntas!",
+      "Nunca dejes de preguntar.",
+      "Me gusta cuando me hablas.",
+      "No te preocupes, estoy aquí para ayudarte.",
+    ];
+
+    // Registro de las últimas respuestas dadas
+    let ultimasRespuestas = [];
+
+    // Contador para llevar el control de las respuestas dadas
+    let contadorRespuestas = 0;
+
+    // Arrays de posibles solicitudes de reporte del viernes
+    const solicitudesReporte = [
+      "Por favor, comparta un resumen de su trabajo de toda la semana.",
+      "Sería genial si pudiera proporcionar un resumen del trabajo realizado durante la semana.",
+      "¿Podría compartir un resumen de sus actividades de esta semana?",
+      "Nos encantaría escuchar sobre su trabajo de toda la semana. ¿Podría proporcionar un resumen?",
+      "¿Podría describir brevemente lo que ha logrado esta semana?",
+      "Estamos interesados en conocer lo que ha estado haciendo esta semana. ¿Podría compartirlo con nosotros?",
+      "¿Podría proporcionar una descripción general de su progreso esta semana?",
+      "Necesitamos un resumen de sus actividades para esta semana. ¿Podría brindarnos uno?",
+      "¿Qué proyectos ha completado esta semana? Nos encantaría saberlo.",
+      "Estamos interesados en conocer sus logros de esta semana. ¿Podría enumerarlos?",
+      "Nos gustaría saber qué tareas ha realizado esta semana. ¿Podría informarnos?",
+      "Por favor, proporcione un resumen de sus tareas y logros de la semana.",
+      "¿Podría detallar su trabajo realizado durante esta semana?",
+      "¿Cuáles han sido los principales hitos de su semana laboral? Nos encantaría escucharlos.",
+      "Por favor, proporcione una visión general de sus actividades de esta semana.",
+      "Nos gustaría saber en qué ha estado trabajando esta semana. ¿Podría compartirlo con nosotros?",
+      "¿Podría ofrecer una descripción general de lo que ha logrado hasta ahora esta semana?",
+      "Por favor, comparta los detalles más destacados de su trabajo de esta semana.",
+      "¿Qué proyectos ha avanzado esta semana? Nos gustaría conocer su progreso.",
+      "Estamos interesados en conocer los detalles de su trabajo semanal. ¿Podría proporcionarlos?",
+    ];
+
+    // Función para elegir una frase aleatoria de un array
+    function fraseAleatoria(array) {
+      let frase = array[Math.floor(Math.random() * array.length)];
+      // Verificar si la frase ya se ha dado recientemente
+      while (ultimasRespuestas.includes(frase)) {
+        frase = array[Math.floor(Math.random() * array.length)];
+      }
+      // Añadir la frase al registro de últimas respuestas
+      ultimasRespuestas.push(frase);
+      // Limitar el registro a las últimas 5 respuestas
+      if (ultimasRespuestas.length > 5) {
+        ultimasRespuestas.shift();
+      }
+      return frase;
+    }
+
+    // Función para procesar la pregunta y dar una respuesta apropiada
+    function responder(input) {
+      let respuesta;
+      if (input.endsWith("?")) {
+        respuesta = fraseAleatoria(respuestasPreguntas);
+      } else {
+        respuesta = fraseAleatoria(comentariosGenericos);
+      }
+      // Verificar si se han dado al menos tres respuestas
+      contadorRespuestas++;
+      if (contadorRespuestas >= 3) {
+        respuesta += " " + fraseAleatoria(solicitudesReporte);
+      }
+      return respuesta;
+    }
+
+    // Función para mostrar mensajes en el chat
+    function mostrarMensaje(sender, message) {
+      const chatMessages = document.getElementById("chat-messages");
+      const newMessage = document.createElement("div");
+      newMessage.innerHTML = `<strong>${sender}: </strong>${message}`;
+      chatMessages.appendChild(newMessage);
+      // Desplazar hacia abajo para mostrar el último mensaje
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Manejar el evento de presionar Enter en el campo de entrada
+    document.getElementById("user-input").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        const userInput = this.value;
+        mostrarMensaje("Tú", userInput);
+        const respuesta = responder(userInput);
+        mostrarMensaje("Chatbot", respuesta);
+        // Limpiar el campo de entrada después de enviar el mensaje
+        this.value = "";
+      }
+    });
+  </script>
+</body>
+</html>
